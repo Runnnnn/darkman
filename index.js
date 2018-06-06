@@ -9,17 +9,25 @@ var prompt = require('co-prompt')
 var program = require('commander')
 
 function copyTemplate (from, to) {
-  write(to, from, fs.readdirSync(from, 'utf-8'))
+  fs.stat(from, (err, stats) => {
+    if (stats.isDirectory()) writeDir(to, from, fs.readdirSync(from, 'utf-8'))
+    else if (stats.isFile()) writeFile(to, fs.readFileSync(from, 'utf-8'))
+  })
 }
-function write (to, from, files, mode) {
-  files.forEach(file => {
-    let dir = from + '/' + file
-    let toDir = to + '/' + file
-    fs.stat(dir, (err, stats) => {
-      if(stats.isFile()) fs.writeFileSync(toDir, file)
-      else {
+function writeFile (to, file, mode) {
+  fs.writeFileSync(to, file)
+}
+function writeDir (to, from, dirs, mode) {
+  dirs.forEach(fileName => {
+    let fromDir = from + '/' + fileName
+    let toDir = to + '/' + fileName
+    fs.stat(fromDir, (err, stats) => {
+      if(stats.isFile()) {
+        writeFile(toDir, fs.readFileSync(fromDir, 'utf-8'))
+      }
+      else if (stats.isDirectory()) {
         mkdir(toDir, () => {
-          copyTemplate(dir, toDir)
+          copyTemplate(fromDir, toDir)
         }) 
       }
     })
