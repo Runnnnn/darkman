@@ -57,21 +57,27 @@ function mkdir (path, fn) {
 var confirm = prompt.confirm
 
 co(function *(){
-  var dir = yield prompt(chalk.blue('project name: '))
-  var redux = yield confirm(chalk.yellow('redux? '))
-  var saga = yield confirm(chalk.hex('#DEADED')('redux-saga? '))
-  var route = yield confirm(chalk.hex('#11aadd')('route? '))
-  // console.log(redux)
-  if (saga === false && route === false) {
+  var dir, stateContainer, reduxSaga
+  dir = yield prompt(chalk.blue('project name: '))
+  stateContainer = yield prompt(chalk.hex('#3c23a9')('redux or mobx?'))
+  if (stateContainer === 'redux') {
+    reduxSaga = yield confirm(chalk.hex('#DEADED')('redux-saga? '))
+  }
+  
+  if (stateContainer !== 'redux' && stateContainer !== 'mobx') {
     let from = path.join(__dirname, 'templates', 'redux-react-starter')
     mkdir('./' + dir, () => copyTemplate(from, './' + dir))
   }
-  if (saga === false && route === true) {
+  if (stateContainer === 'redux' && reduxSaga === false) {
     let from = path.join(__dirname, 'templates', 'react-redux-boilerplate')
     mkdir('./' + dir, () => copyTemplate(from, './' + dir))
   }
-  if (saga === true && route === true) {
+  if (stateContainer === 'redux' && reduxSaga === true) {
     let from = path.join(__dirname, 'templates', 'react-redux-saga-boilerplate')
+    mkdir('./' + dir, () => copyTemplate(from, './' + dir))
+  }
+  if (stateContainer === 'mobx') {
+    let from = path.join(__dirname, 'templates', 'mobx-react-boilerplate')
     mkdir('./' + dir, () => copyTemplate(from, './' + dir))
   }
   process.stdin.pause()
